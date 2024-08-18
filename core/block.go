@@ -2,26 +2,26 @@ package core
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/gob"
 	"fmt"
 	"time"
-	"crypto/sha256"
 
 	"github.com/bishalbera/modular-blockchain/crypto"
 	"github.com/bishalbera/modular-blockchain/types"
 )
 
 type Header struct {
-	Version uint32
-	DataHash types.Hash
+	Version       uint32
+	DataHash      types.Hash
 	PrevBlockHash types.Hash
-	Height uint32
-	TimeStamp int64
+	Height        uint32
+	TimeStamp     int64
 }
 
 func (h *Header) Bytes() []byte {
-	buf:= &bytes.Buffer{}
-	enc:= gob.NewEncoder(buf)
+	buf := &bytes.Buffer{}
+	enc := gob.NewEncoder(buf)
 
 	enc.Encode(h)
 
@@ -31,33 +31,32 @@ func (h *Header) Bytes() []byte {
 type Block struct {
 	*Header
 	Transactions []*Transaction
-	Validator crypto.PrivateKey
-	Signature *crypto.Signature
+	Validator    crypto.PrivateKey
+	Signature    *crypto.Signature
 
 	// Cached verison of the header hash
 	hash types.Hash
 }
 
-
 func NewBlock(h *Header, txx []*Transaction) (*Block, error) {
 	return &Block{
-		Header: h,
+		Header:       h,
 		Transactions: txx,
-	},nil
+	}, nil
 }
 
 func NewBlockFromPrevHeader(prevHeader *Header, txx []*Transaction) (*Block, error) {
-	dataHash, err:= CalculateDataHash(txx)
-	if err!= nil {
-		return nil,err
+	dataHash, err := CalculateDataHash(txx)
+	if err != nil {
+		return nil, err
 	}
 
-	header:= &Header{
-		Version: 1,
-		Height: prevHeader.Height + 1,
-		DataHash: dataHash,
+	header := &Header{
+		Version:       1,
+		Height:        prevHeader.Height + 1,
+		DataHash:      dataHash,
 		PrevBlockHash: BlockHasher{}.Hash(prevHeader),
-		TimeStamp: time.Now().UnixNano(),
+		TimeStamp:     time.Now().UnixNano(),
 	}
 	return NewBlock(header, txx)
 }
@@ -66,10 +65,10 @@ func (b *Block) AddTransaction(tx *Transaction) {
 	b.Transactions = append(b.Transactions, tx)
 }
 
-func (b *Block) Sign (privKey crypto.PrivateKey) error {
-	sig, err:= privKey.Sign(b.Header.Bytes())
+func (b *Block) Sign(privKey crypto.PrivateKey) error {
+	sig, err := privKey.Sign(b.Header.Bytes())
 
-	if err!=nil {
+	if err != nil {
 		return err
 	}
 	b.Validator = privKey.PublicKey()
@@ -121,10 +120,10 @@ func (b *Block) Hash(hasher Hasher[*Header]) types.Hash {
 }
 
 func CalculateDataHash(txx []*Transaction) (hash types.Hash, err error) {
-	buf:= &bytes.Buffer{}
+	buf := &bytes.Buffer{}
 
-	for _, tx:= range txx {
-		if err= tx.Encode(NewGobTxEncoder(buf)); err!= nil {
+	for _, tx := range txx {
+		if err = tx.Encode(NewGobTxEncoder(buf)); err != nil {
 			return
 		}
 	}
