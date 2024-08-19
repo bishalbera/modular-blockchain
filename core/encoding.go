@@ -73,4 +73,3 @@ func (dec *GobBlockDecoder) Decode(b *Block) error {
 func init() {
 	gob.Register(elliptic.P256())
 }
-

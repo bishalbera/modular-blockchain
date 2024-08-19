@@ -7,11 +7,9 @@ import (
 	"github.com/bishalbera/modular-blockchain/types"
 )
 
-
-
 type Transaction struct {
-	Data []byte
-	From crypto.PublicKey
+	Data      []byte
+	From      crypto.PublicKey
 	Signature *crypto.Signature
 	// cached version of the tx data hash
 	hash types.Hash
@@ -32,8 +30,8 @@ func (tx *Transaction) Hash(hasher Hasher[*Transaction]) types.Hash {
 }
 
 func (tx *Transaction) Sign(privKey crypto.PrivateKey) error {
-	sig, err:= privKey.Sign(tx.Data)
-	if err!= nil {
+	sig, err := privKey.Sign(tx.Data)
+	if err != nil {
 		return err
 	}
 	tx.From = privKey.PublicKey()
@@ -43,7 +41,7 @@ func (tx *Transaction) Sign(privKey crypto.PrivateKey) error {
 }
 
 func (tx *Transaction) Verify() error {
-	if tx.Signature ==nil {
+	if tx.Signature == nil {
 		return fmt.Errorf("transaction has no signature")
 	}
 	if !tx.Signature.Verify(tx.From, tx.Data) {
@@ -52,10 +50,10 @@ func (tx *Transaction) Verify() error {
 	return nil
 }
 
-func (tx *Transaction) Decode(dec Decoder[*Transaction]) error{
+func (tx *Transaction) Decode(dec Decoder[*Transaction]) error {
 	return dec.Decode(tx)
 }
 
-func (tx *Transaction) Encode(enc Encoder[*Transaction]) error{
+func (tx *Transaction) Encode(enc Encoder[*Transaction]) error {
 	return enc.Encode(tx)
 }

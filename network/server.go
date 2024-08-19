@@ -11,25 +11,24 @@ import (
 var defaultBlockTime = 5 * time.Second
 
 type ServerOpts struct {
-	Transports []Transport
-	ID string
-	Logger log.Logger
-	RPCDecodeFunc  RPCDecodeFunc
-	RPCProcessor RPCProcessor
-	BlockTime time.Duration
-	PrivateKey  *crypto.PrivateKey
+	Transports    []Transport
+	ID            string
+	Logger        log.Logger
+	RPCDecodeFunc RPCDecodeFunc
+	RPCProcessor  RPCProcessor
+	BlockTime     time.Duration
+	PrivateKey    *crypto.PrivateKey
 }
 type Server struct {
 	ServerOpts
-	mempool *TxPool
-	chain *core.Blockchain
+	mempool     *TxPool
+	chain       *core.Blockchain
 	isValidator bool
-	rpcCh chan RPC
-	quitCh chan struct{}
-
+	rpcCh       chan RPC
+	quitCh      chan struct{}
 }
 
-func NewServer (opts ServerOpts) (*Server, error) {
+func NewServer(opts ServerOpts) (*Server, error) {
 	if opts.BlockTime == time.Duration(0) {
 		opts.BlockTime = defaultBlockTime
 	}
@@ -41,16 +40,16 @@ func NewServer (opts ServerOpts) (*Server, error) {
 		opts.Logger = log.With(opts.Logger, "ID", opts.ID)
 	}
 	chain, err := core.NewBlockchain(opts.Logger, genesisBlock())
-	if err!= nil {
+	if err != nil {
 		return nil, err
 	}
-	s:= &Server{
-		ServerOpts: opts,
-		chain: chain,
-		mempool: NewTxPool(1000),
+	s := &Server{
+		ServerOpts:  opts,
+		chain:       chain,
+		mempool:     NewTxPool(1000),
 		isValidator: opts.PrivateKey != nil,
-		rpcCh: make(chan RPC),
-		quitCh: make(chan struct{}, 1),
+		rpcCh:       make(chan RPC),
+		quitCh:      make(chan struct{}, 1),
 	}
 
 	/*
@@ -70,8 +69,8 @@ func NewServer (opts ServerOpts) (*Server, error) {
 
 func (s *Server) initTransports() {
 	for _, tr := range s.Transports {
-		go func (tr Transport)  {
-			for rpc:= range tr.Consume() {
+		go func(tr Transport) {
+			for rpc := range tr.Consume() {
 				s.rpcCh <- rpc
 			}
 		}(tr)
@@ -81,29 +80,28 @@ func (s *Server) initTransports() {
 func (s *Server) Start() {
 	s.initTransports()
 
-
-	free:
-		for {
-			select {
-			case rpc:= <-s.rpcCh:
-				msg, err:= s.RPCDecodeFunc(rpc)
-				if err != nil {
-					s.Logger.Log("error", err)
-				}
-				if err := s.RPCProcessor.ProcessMessage(msg); err!=nil {
-					s.Logger.Log("error", err)
-				}
-			case <-s.quitCh:
-				break free
+free:
+	for {
+		select {
+		case rpc := <-s.rpcCh:
+			msg, err := s.RPCDecodeFunc(rpc)
+			if err != nil {
+				s.Logger.Log("error", err)
 			}
+			if err := s.RPCProcessor.ProcessMessage(msg); err != nil {
+				s.Logger.Log("error", err)
+			}
+		case <-s.quitCh:
+			break free
 		}
+	}
 
 	s.Logger.Log("msg", "Server is shutting down")
 
 }
 
 func (s *Server) validatorLoop() {
-	ticker:= time.NewTicker(s.BlockTime)
+	ticker := time.NewTicker(s.BlockTime)
 
 	s.Logger.Log("msg", "Starting validator loop", "blocktime", s.BlockTime)
 
@@ -114,13 +112,13 @@ func (s *Server) validatorLoop() {
 }
 
 func genesisBlock() *core.Block {
-	header := &core.Header {
-		Version: 1,
-		DataHash: types.Hash{},
-		Height: 0,
+	header := &core.Header{
+		Version:   1,
+		DataHash:  types.Hash{},
+		Height:    0,
 		TimeStamp: 00000,
 	}
 
-	b,_:= core.NewBlock(header, nil)
+	b, _ := core.NewBlock(header, nil)
 	return b
 }

@@ -15,20 +15,20 @@ type PrivateKey struct {
 }
 
 func (k PrivateKey) Sign(data []byte) (*Signature, error) {
-	r,s, err:= ecdsa.Sign(rand.Reader, k.key, data)
+	r, s, err := ecdsa.Sign(rand.Reader, k.key, data)
 	if err != nil {
 
-		return nil,err
+		return nil, err
 	}
-	return &Signature {
-		R:r,
+	return &Signature{
+		R: r,
 		S: s,
 	}, nil
 }
 
 func GeneratePrivateKey() PrivateKey {
-	key,err:= ecdsa.GenerateKey(elliptic.P256(),rand.Reader)
-	if err !=nil {
+	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
 		panic(err)
 	}
 	return PrivateKey{
@@ -37,7 +37,7 @@ func GeneratePrivateKey() PrivateKey {
 }
 
 func (k PrivateKey) PublicKey() PublicKey {
-	return PublicKey {
+	return PublicKey{
 		Key: &k.key.PublicKey,
 	}
 }
@@ -51,7 +51,7 @@ func (k PublicKey) ToSlice() []byte {
 }
 
 func (k PublicKey) Address() types.Address {
-	h:= sha256.Sum256(k.ToSlice())
+	h := sha256.Sum256(k.ToSlice())
 
 	return types.AddressFromBytes(h[len(h)-20:])
 }
