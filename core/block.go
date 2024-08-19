@@ -31,7 +31,7 @@ func (h *Header) Bytes() []byte {
 type Block struct {
 	*Header
 	Transactions []*Transaction
-	Validator    crypto.PrivateKey
+	Validator    crypto.PublicKey
 	Signature    *crypto.Signature
 
 	// Cached verison of the header hash
@@ -67,10 +67,10 @@ func (b *Block) AddTransaction(tx *Transaction) {
 
 func (b *Block) Sign(privKey crypto.PrivateKey) error {
 	sig, err := privKey.Sign(b.Header.Bytes())
-
 	if err != nil {
 		return err
 	}
+
 	b.Validator = privKey.PublicKey()
 	b.Signature = sig
 

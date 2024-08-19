@@ -68,7 +68,7 @@ func (bc *Blockchain) handleNativeTransfer(tx *Transaction) error {
 		"msg", "handle native token transfer",
 		"from", tx.From,
 		"to", tx.To,
-		"value", tx.value,
+		"value", tx.Value,
 	)
 	return bc.accountState.Transfer(tx.From.Address(), tx.To.Address(), tx.Value)
 }
@@ -157,7 +157,7 @@ func (bc *Blockchain) handleTransaction(tx *Transaction) error {
 	if len(tx.Data) > 0 {
 		bc.logger.Log("msg", "executing code", "len", len(tx.Data), "hash", tx.Hash(&TxHasher{}))
 
-		vm := NewVM(TX.Data, bc.contractState)
+		vm := NewVM(tx.Data, bc.contractState)
 		if err := vm.Run(); err != nil {
 			return err
 		}
@@ -217,5 +217,5 @@ func (bc *Blockchain) addBlockWithoutValidation(b *Block) error {
 		"transactions", len(b.Transactions),
 	)
 
-	return &bc.store.Put(b)
+	return bc.store.Put(b)
 }

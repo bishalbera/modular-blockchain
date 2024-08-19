@@ -5,6 +5,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/bishalbera/modular-blockchain/core"
+	"github.com/bishalbera/modular-blockchain/crypto"
+	"github.com/bishalbera/modular-blockchain/types"
 	"github.com/go-kit/log"
 )
 

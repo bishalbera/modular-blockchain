@@ -1,10 +1,12 @@
 package network
 
+import "io"
+
 type NetAddr string
 
 type RPC struct {
 	From    NetAddr
-	Payload []byte
+	Payload io.Reader
 }
 
 type Transport interface {
