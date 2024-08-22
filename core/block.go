@@ -16,7 +16,7 @@ type Header struct {
 	DataHash      types.Hash
 	PrevBlockHash types.Hash
 	Height        uint32
-	TimeStamp     int64
+	Timestamp     int64
 }
 
 func (h *Header) Bytes() []byte {
@@ -56,7 +56,7 @@ func NewBlockFromPrevHeader(prevHeader *Header, txx []*Transaction) (*Block, err
 		Height:        prevHeader.Height + 1,
 		DataHash:      dataHash,
 		PrevBlockHash: BlockHasher{}.Hash(prevHeader),
-		TimeStamp:     time.Now().UnixNano(),
+		Timestamp:     time.Now().UnixNano(),
 	}
 	return NewBlock(header, txx)
 }
