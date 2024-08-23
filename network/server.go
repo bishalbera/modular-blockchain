@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/bishalbera/modular-blockchain/api"
 	"github.com/bishalbera/modular-blockchain/core"
 	"github.com/bishalbera/modular-blockchain/crypto"
 	"github.com/bishalbera/modular-blockchain/types"
@@ -123,16 +124,6 @@ func (s *Server) bootStrapNetwork() {
 				conn: conn,
 			}
 		}(addr)
-	}
-}
-
-func (s *Server) initTransports() {
-	for _, tr := range s.Transports {
-		go func(tr Transport) {
-			for rpc := range tr.Consume() {
-				s.rpcCh <- rpc
-			}
-		}(tr)
 	}
 }
 
@@ -302,7 +293,6 @@ func (s *Server) processStatusMessage(from net.Addr, data *StatusMessage) error 
 	go s.requestBlocksLoop(from)
 	return nil
 }
-
 func (s *Server) processGetStatusMessage(from net.Addr, data *GetStatusMessage) error {
 	s.Logger.Log("msg", "received getStatus message", "from", from)
 
@@ -318,11 +308,14 @@ func (s *Server) processGetStatusMessage(from net.Addr, data *GetStatusMessage) 
 
 	s.mu.RLock()
 	defer s.mu.RUnlock()
+
 	peer, ok := s.peerMap[from]
 	if !ok {
 		return fmt.Errorf("peer %s not known", peer.conn.RemoteAddr())
 	}
+
 	msg := NewMessage(MessageTypeStatus, buf.Bytes())
+
 	return peer.Send(msg.Bytes())
 }
 
